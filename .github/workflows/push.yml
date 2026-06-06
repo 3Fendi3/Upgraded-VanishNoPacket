@@ -26,27 +26,22 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
-      - name: Build with Gradle
-        run: ./gradlew shadowJar
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.6.0
         with:
           name: plugin
-          path: build/libs/VanishNoPacket-*.jar
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@v4
+          path: target/VanishNoPacket-*.jar
       - name: Create Release
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           sha_short=$(git rev-parse --short HEAD)
-          version=$(ls build/libs/VanishNoPacket-*.jar | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
+          version=$(ls target/VanishNoPacket-*.jar | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
           gh release create --draft "v$version+$sha_short" --title "$version: $sha_short"
-          gh release upload "v$version+$sha_short" $(ls build/libs/VanishNoPacket-*.jar)
+          gh release upload "v$version+$sha_short" $(ls target/VanishNoPacket-*.jar)
           gh release edit "v$version+$sha_short" --draft=false
-      - name: Publish to Hangar
-        env:
-          HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
-        run: ./gradlew build publishPluginPublicationToHangar --stacktrace --no-configuration-cache

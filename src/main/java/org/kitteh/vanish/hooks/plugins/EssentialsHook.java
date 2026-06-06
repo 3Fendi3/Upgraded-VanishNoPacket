@@ -47,8 +47,13 @@ public final class EssentialsHook extends Hook {
     public void onEnable() {
         final Plugin grab = this.plugin.getServer().getPluginManager().getPlugin("Essentials");
         if (grab != null && grab.isEnabled()) {
-            this.essentials = ((IEssentials) grab);
-            this.plugin.getLogger().info("Now hooking into Essentials");
+            if (grab instanceof IEssentials essentials) {
+                this.essentials = essentials;
+                this.plugin.getLogger().info("Now hooking into Essentials");
+            } else {
+                this.essentials = null;
+                this.plugin.getLogger().warning("Essentials was found, but its API is not visible to VanishNoPacket. Check that EssentialsX is not bundled inside the VanishNoPacket jar.");
+            }
         } else {
             this.plugin.getLogger().info("You wanted Essentials support. I could not find Essentials.");
             this.essentials = null;

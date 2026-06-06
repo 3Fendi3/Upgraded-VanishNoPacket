@@ -194,15 +194,16 @@ public final class VanishPlugin extends JavaPlugin implements Listener {
   @Override
   public void onDisable() {
     Debuggle.nah();
-    for (final Player player : VanishPlugin.this.getServer().getOnlinePlayers()) {
-      if (this.manager.isVanished(player)) {
-        player.sendMessage(
-            Component.text("[Vanish] You have been forced visible by a reload.", NamedTextColor.DARK_AQUA));
-
+    if (this.manager != null) {
+      for (final Player player : VanishPlugin.this.getServer().getOnlinePlayers()) {
+        if (this.manager.isVanished(player)) {
+          player.sendMessage(
+              Component.text("[Vanish] You have been forced visible by a reload.", NamedTextColor.DARK_AQUA));
+        }
       }
+      this.hookManager.onDisable();
+      this.manager.onPluginDisable();
     }
-    this.hookManager.onDisable();
-    this.manager.onPluginDisable();
     this.getLogger().info(this.getCurrentVersion() + " unloaded.");
   }
 
@@ -223,6 +224,7 @@ public final class VanishPlugin extends JavaPlugin implements Listener {
     }
 
     Settings.freshStart(this);
+    this.manager = new VanishManager(this);
 
     if (this.getConfig().getBoolean("hooks.essentials", false)) {
       this.hookManager.getHook(HookType.Essentials).onEnable();
@@ -238,8 +240,6 @@ public final class VanishPlugin extends JavaPlugin implements Listener {
     if (this.getConfig().getBoolean("hooks.luckperms", false)) {
       this.hookManager.getHook(HookType.LuckPerms).onEnable();
     }
-
-    this.manager = new VanishManager(this);
 
     for (final Player player : this.getServer().getOnlinePlayers()) {
       player.setMetadata("vanished", new LazyMetadataValue(this, CacheStrategy.NEVER_CACHE,

@@ -1,0 +1,41 @@
+name: VanishNoPacket
+version: ${vnp-version}
+main: org.kitteh.vanish.VanishPlugin
+api-version: '1.21.11'
+description: Vanish for the high speed admin
+authors:
+  - Matt "MBax" Baxter
+  - Lexie "Tech" Malina
+  - Fendi (forked)
+folia-supported: true
+softdepend:
+  - Essentials
+  - PlaceholderAPI
+  - Vault
+  - squaremap
+  - LuckPerms
+permissions:
+  vanish.vanish:
+    description: Allows use of vanish commands.
+    default: op
+  vanish.joinvanished:
+    description: Allows joining vanished when join.vanish-on-join is enabled.
+    default: false
+  vanish.joinwithoutannounce:
+    description: Allows joining without a public join announcement.
+    default: false
+  vanish.see:
+    description: Allows seeing vanished players.
+    default: op
+  vanish.statusupdates:
+    description: Allows receiving vanish status updates.
+    default: op
+  vanish.list:
+    description: Allows listing vanished players.
+    default: op
+  vanish.reload:
+    description: Allows reloading VanishNoPacket configuration.
+    default: op
+  vanish.fakeannounce:
+    description: Allows fake join and fake quit announcements.
+    default: op

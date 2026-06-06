@@ -31,7 +31,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -59,7 +58,14 @@ public final class VanishCommand {
     plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commandManager -> {
       final Commands commands = commandManager.registrar();
 
-      final LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("vanish")
+      commands.register(this.command("vanish").build(), "Vanish", List.of("vnp"));
+      commands.register(this.command("v").build(), "Vanish");
+    });
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private LiteralArgumentBuilder<CommandSourceStack> command(@NonNull String name) {
+    return Commands.literal(name)
           .requires(predicate -> {
             final Entity executor = predicate.getExecutor();
             if (executor == null) {
@@ -83,7 +89,7 @@ public final class VanishCommand {
             this.plugin.reload();
             final Entity executor = ctx.getSource().getExecutor();
             if (executor == null) {
-              log.info(ANSIComponentSerializer.ansi().serialize(this.reloadMessage));
+              log.info("[Vanish] Users reloaded and some settings refreshed");
             } else {
               executor.sendMessage(this.reloadMessage);
             }
@@ -109,7 +115,7 @@ public final class VanishCommand {
             final Component message = Component.text("Vanished: ", NamedTextColor.DARK_AQUA)
                 .append(list);
             if (executor == null) {
-              log.info(ANSIComponentSerializer.ansi().serialize(message));
+              log.info("Vanished: {}", String.join(", ", this.plugin.getManager().getVanishedPlayers()));
             } else {
               executor.sendMessage(message);
             }
@@ -189,9 +195,6 @@ public final class VanishCommand {
                 return VanishPerms.canFakeAnnounce((Player) executor);
               }).executes(ctx -> fakeJoin(ctx, false))
               .then(Commands.literal("force").executes(ctx -> fakeJoin(ctx, true))));
-
-      commands.register(command.build(), "Vanish", List.of(new String[]{"v", "vnp"}));
-    });
   }
 
   @SuppressWarnings("UnstableApiUsage")

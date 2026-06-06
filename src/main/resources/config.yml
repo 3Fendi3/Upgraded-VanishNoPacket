@@ -7,13 +7,18 @@
 #  https://dev.bukkit.org/projects/vanish/pages/configuration
 #
 fakeannounce:
+    # This only controls delayed fake join messages for players who joined silently.
+    # It does not make players join vanished.
     automaticforsilentjoin: true
 
+join:
+    vanish-on-join: false
+
 hooks:
-    essentials: false
+    essentials: true
     discordsrv: false
     squaremap: false
-    luckperms: false
+    luckperms: true
 
 permissionsupdates:
     checkonworldchange: false
@@ -30,4 +35,4 @@ double-sneak-during-vanish-switches-gamemode:
     message: '&aGameMode changed!'
 
 configVersionDoNotTouch:
-    SeriouslyThisWillEraseYourConfig: 10
+    SeriouslyThisWillEraseYourConfig: 11

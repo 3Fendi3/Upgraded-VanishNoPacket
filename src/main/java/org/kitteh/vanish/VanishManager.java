@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Effect;
@@ -94,7 +96,12 @@ public final class VanishManager {
   private final VanishPlugin plugin;
   private final Set<String> vanishedPlayerNames = Collections.synchronizedSet(new HashSet<>());
   private final Map<String, Boolean> sleepIgnored = new HashMap<>();
-  private final Set<UUID> bats = new HashSet<>();
+  private final Set<UUID> bats = ConcurrentHashMap.newKeySet();
+  private final BossBar vanishBossBar = BossBar.bossBar(
+      Component.text("VANISH ENABLED - You are hidden", NamedTextColor.AQUA),
+      1.0f,
+      BossBar.Color.BLUE,
+      BossBar.Overlay.PROGRESS);
   private final VanishAnnounceManipulator announceManipulator;
   private final Random random = new Random();
   private final ShowPlayerHandler showPlayer;
@@ -135,6 +142,10 @@ public final class VanishManager {
 
   public @NonNull Set<UUID> getBats() {
     return this.bats;
+  }
+
+  public boolean removeBat(@NonNull UUID bat) {
+    return this.bats.remove(bat);
   }
 
   public @NonNull Set<String> getVanishedPlayers() {
@@ -184,6 +195,7 @@ public final class VanishManager {
    */
   public void playerQuit(@NonNull Player player) {
     Debuggle.log("Quitting: " + player.getName());
+    this.hideBossBar(player);
     this.resetSleepingIgnored(player);
     VanishPerms.userQuit(player);
     this.removeVanished(player.getName());
@@ -282,11 +294,13 @@ public final class VanishManager {
         vanishingPlayer.setCollidable(false);
       }
       this.vanishedPlayerNames.add(vanishingPlayerName);
+      vanishingPlayer.showBossBar(this.vanishBossBar);
       this.plugin.getLogger().info(vanishingPlayerName + " disappeared.");
     } else {
       Debuggle.log("It's visible time! " + vanishingPlayer.getName());
       this.resetSleepingIgnored(vanishingPlayer);
       this.removeVanished(vanishingPlayerName);
+      vanishingPlayer.hideBossBar(this.vanishBossBar);
       byte coll = vanishingPlayer.getPersistentDataContainer()
           .getOrDefault(this.vanishCollideState, PersistentDataType.BYTE, (byte) 0x00);
       if (coll == 0x01) {
@@ -382,14 +396,16 @@ public final class VanishManager {
     }
   }
 
+  public void hideBossBar(@NonNull Player player) {
+    player.hideBossBar(this.vanishBossBar);
+  }
+
   private void effectBats(final @NonNull Location location) {
     final Set<UUID> batty = new HashSet<>();
     for (int x = 0; x < 10; x++) {
       batty.add(location.getWorld().spawnEntity(location, EntityType.BAT).getUniqueId());
     }
     this.bats.addAll(batty);
-    for (Object b : batty.toArray()) {
-    }
 
     this.plugin.getServer().getRegionScheduler().runDelayed(this.plugin, location, (j) -> {
       VanishManager.this.effectBatsCleanup(location.getWorld(), batty);
@@ -397,8 +413,6 @@ public final class VanishManager {
     }, 3 * 20);
 
   }
-
-  ;
 
   private void effectBatsCleanup(@NonNull World world, @NonNull Set<UUID> bats) {
     for (final Entity entity : world.getEntities()) {
@@ -471,6 +485,7 @@ public final class VanishManager {
 
   void onPluginDisable() {
     for (final Player player : this.plugin.getServer().getOnlinePlayers()) {
+      this.hideBossBar(player);
       for (final Player player2 : this.plugin.getServer().getOnlinePlayers()) {
         if (!player.equals(player2)) {
           player.showPlayer(this.plugin, player2);

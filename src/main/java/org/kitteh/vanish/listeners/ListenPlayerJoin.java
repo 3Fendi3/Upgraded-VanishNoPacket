@@ -27,6 +27,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.metadata.LazyMetadataValue;
 import org.bukkit.metadata.LazyMetadataValue.CacheStrategy;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.kitteh.vanish.Settings;
 import org.kitteh.vanish.VanishCheck;
 import org.kitteh.vanish.VanishPerms;
 import org.kitteh.vanish.VanishPlugin;
@@ -45,7 +46,7 @@ public final class ListenPlayerJoin implements Listener {
         new LazyMetadataValue(this.plugin, CacheStrategy.NEVER_CACHE,
             new VanishCheck(this.plugin.getManager(), event.getPlayer().getName())));
     this.plugin.getManager().resetSeeing(event.getPlayer());
-    if (VanishPerms.joinVanished(event.getPlayer())) {
+    if (Settings.getVanishOnJoin() && VanishPerms.joinVanished(event.getPlayer())) {
       this.plugin.getManager().toggleVanishQuiet(event.getPlayer(), false);
       this.plugin.hooksVanish(event.getPlayer());
     }
@@ -56,7 +57,7 @@ public final class ListenPlayerJoin implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerJoinLate(@NonNull PlayerJoinEvent event) {
     final StringBuilder statusUpdate = new StringBuilder();
-    if (VanishPerms.joinVanished(event.getPlayer())) {
+    if (Settings.getVanishOnJoin() && VanishPerms.joinVanished(event.getPlayer())) {
       Component message = Component.text("You have joined vanished.", NamedTextColor.DARK_AQUA);
       if (VanishPerms.canVanish(event.getPlayer())) {
         message = message.append(Component.text(" To appear: /vanish",  NamedTextColor.DARK_AQUA));

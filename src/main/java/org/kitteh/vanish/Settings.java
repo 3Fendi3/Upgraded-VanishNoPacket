@@ -26,16 +26,21 @@ public final class Settings {
   private static String fakeQuit;
   private static String fakeJoin;
   private static boolean autoFakeJoinSilent;
+  private static boolean vanishOnJoin;
   private static boolean worldChangeCheck;
   private static int lightningEffectCount;
   private static boolean doubleSneakDuringVanishSwitchesGameMode = false;
   private static int doubleSneakDuringVanishSwitchesGameModeTimeBetweenSneaksInMS = 500;
   private static String doubleSneakDuringVanishSwitchesGameModeMessage = "&aGameMode changed!";
 
-  private static final int confVersion = 10; // Tracking config version
+  private static final int confVersion = 11; // Tracking config version
 
   public static boolean getAutoFakeJoinSilent() {
     return Settings.autoFakeJoinSilent;
+  }
+
+  public static boolean getVanishOnJoin() {
+    return Settings.vanishOnJoin;
   }
 
   public static boolean getEnablePermTest() {
@@ -107,6 +112,8 @@ public final class Settings {
         case 9:
           config.set("hooks.luckperms", false);
           config.set("hooks.dynmap", null);
+        case 10:
+          config.set("join.vanish-on-join", false);
           break;
         default:
           plugin.getLogger().severe(
@@ -119,6 +126,7 @@ public final class Settings {
     }
     Settings.enablePermTest = config.getBoolean("permtest", false);
     Settings.autoFakeJoinSilent = config.getBoolean("fakeannounce.automaticforsilentjoin", false);
+    Settings.vanishOnJoin = config.getBoolean("join.vanish-on-join", false);
     Settings.worldChangeCheck = config.getBoolean("permissionsupdates.checkonworldchange", false);
     Settings.doubleSneakDuringVanishSwitchesGameMode = config.getBoolean(
         "double-sneak-during-vanish-switches-gamemode.enabled", false);

@@ -1,5 +1,6 @@
 import io.papermc.hangarpublishplugin.HangarPublishTask
 import io.papermc.hangarpublishplugin.model.Platforms
+import xyz.jpenilla.resourcefactory.bukkit.Permission.Default
 import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
@@ -7,7 +8,6 @@ plugins {
     `maven-publish`
     idea
     id("com.palantir.git-version") version "4.1.0"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("xyz.jpenilla.resource-factory-paper-convention") version "1.3.0"
     id("com.gradleup.shadow") version "9.0.0-rc1"
@@ -37,8 +37,11 @@ dependencies {
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
-    implementation("net.essentialsx:EssentialsX:2.21.1") {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("net.essentialsx:EssentialsX:2.21.2") {
+        exclude("org.spigotmc")
+    }
+    testImplementation("net.essentialsx:EssentialsX:2.21.2") {
         exclude("org.spigotmc")
     }
     compileOnly("com.github.milkbowl:vaultapi:1.7") {
@@ -48,7 +51,7 @@ dependencies {
     compileOnly("net.luckperms:api:5.5")
     testImplementation("net.luckperms:api:5.5")
 
-    implementation("me.clip:placeholderapi:2.11.6") {
+    compileOnly("me.clip:placeholderapi:2.11.6") {
         exclude("me.clip.placeholderapi.libs.kyori")
         exclude("net.kyori")
     }
@@ -60,8 +63,6 @@ dependencies {
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_21
-paperweight.reobfArtifactConfiguration =
-    io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 publishing {
     publications.create<MavenPublication>("maven") {
@@ -84,7 +85,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.8")
+        minecraftVersion("1.21.11")
         downloadPlugins {
             url("https://download.luckperms.net/1609/bukkit/loader/LuckPerms-Bukkit-5.5.20.jar")
         }
@@ -140,19 +141,56 @@ tasks.withType(HangarPublishTask::class).configureEach {
 }
 
 paperPluginYaml {
+    name = "VanishNoPacket"
     main = "org.kitteh.vanish.VanishPlugin"
     authors.add("Matt \"MBax\" Baxter")
     authors.add("Lexie \"Tech\" Malina")
-    apiVersion = "1.20.6"
+    authors.add("Fendi (forked)")
+    apiVersion = "1.21.11"
     version = project.version.toString()
     description = "Vanish for the high speed admin"
     foliaSupported = true
 
     dependencies {
-        server("Essentials", PaperPluginYaml.Load.OMIT, false)
-        server("PlaceholderAPI", PaperPluginYaml.Load.OMIT, false)
-        server("Vault", PaperPluginYaml.Load.OMIT, false)
-        server("squaremap", PaperPluginYaml.Load.OMIT, false)
-        server("LuckPerms", PaperPluginYaml.Load.OMIT, false)
+        server("Essentials", PaperPluginYaml.Load.BEFORE, false)
+        server("PlaceholderAPI", PaperPluginYaml.Load.BEFORE, false)
+        server("Vault", PaperPluginYaml.Load.BEFORE, false)
+        server("squaremap", PaperPluginYaml.Load.BEFORE, false)
+        server("LuckPerms", PaperPluginYaml.Load.BEFORE, false)
+    }
+
+    permissions {
+        register("vanish.vanish") {
+            description.set("Allows use of vanish commands.")
+            default.set(Default.OP)
+        }
+        register("vanish.joinvanished") {
+            description.set("Allows joining vanished when join.vanish-on-join is enabled.")
+            default.set(Default.FALSE)
+        }
+        register("vanish.joinwithoutannounce") {
+            description.set("Allows joining without a public join announcement.")
+            default.set(Default.FALSE)
+        }
+        register("vanish.see") {
+            description.set("Allows seeing vanished players.")
+            default.set(Default.OP)
+        }
+        register("vanish.statusupdates") {
+            description.set("Allows receiving vanish status updates.")
+            default.set(Default.OP)
+        }
+        register("vanish.list") {
+            description.set("Allows listing vanished players.")
+            default.set(Default.OP)
+        }
+        register("vanish.reload") {
+            description.set("Allows reloading VanishNoPacket configuration.")
+            default.set(Default.OP)
+        }
+        register("vanish.fakeannounce") {
+            description.set("Allows fake join and fake quit announcements.")
+            default.set(Default.OP)
+        }
     }
 }

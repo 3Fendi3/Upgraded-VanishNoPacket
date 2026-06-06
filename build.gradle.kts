@@ -17,7 +17,7 @@ plugins {
 val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
 val details = versionDetails()
 group = "org.kitteh"
-version = "3.22-SNAPSHOT" + '+' + details.gitHash
+version = "4-SNAPSHOT" + '+' + details.gitHash
 description = "VanishNoPacket-Refined"
 
 repositories {
